@@ -185,7 +185,16 @@ const webSearchParams = Type.Object({
 // ---------------------------------------------------------------------------
 
 export default function deepseekSearchExtension(pi: ExtensionAPI) {
-  pi.registerTool({
+  pi.on("session_start", async (_event, ctx) => {
+    // Only register if DeepSeek is configured
+    try {
+      const key = await resolveApiKey(ctx);
+      if (!key) return;
+    } catch {
+      return;
+    }
+
+    pi.registerTool({
     name: "web_search",
     label: "Web Search",
     description:
@@ -275,5 +284,6 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
         return { content: [{ type: "text", text: `Search failed: ${message}` }], isError: true };
       }
     },
+  });
   });
 }
