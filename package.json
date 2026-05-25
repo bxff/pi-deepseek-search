@@ -1,7 +1,7 @@
 {
   "name": "pi-deepseek-search",
   "version": "1.0.6",
-  "description": "Zero-config web search for pi via DeepSeek's Anthropic endpoint. Adds web_search tool using DeepSeek's server-side search. No API keys needed — auto-detects your existing DeepSeek auth.",
+  "description": "Web search for Pi using DeepSeek's server side search. Only works with DeepSeek models.",
   "keywords": [
     "pi-package",
     "pi-extension",
