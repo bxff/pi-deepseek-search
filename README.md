@@ -13,3 +13,5 @@ Adds web search to Pi using DeepSeek's undocumented `web_search_20260209` server
 Only works with DeepSeek models. The search runs on DeepSeek's servers during inference, so you can't use it with Anthropic, OpenAI, or any other provider.
 
 Defaults to `deepseek-v4-flash`. Set `DEEPSEEK_SEARCH_MODEL` to change it.
+
+Read more: [How I found DeepSeek's undocumented web search endpoint](https://musaab.io/posts/2026/deepseek-search)
