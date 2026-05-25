@@ -1,0 +1,28 @@
+{
+  "name": "pi-deepseek-search",
+  "version": "1.0.3",
+  "description": "Zero-config web search for pi via DeepSeek's Anthropic endpoint. Adds web_search tool using DeepSeek's server-side search. No API keys needed — auto-detects your existing DeepSeek auth.",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "web-search",
+    "deepseek",
+    "search"
+  ],
+  "license": "MIT",
+  "author": "Dex Devlon (bxff)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bxff/pi-deepseek-search.git"
+  },
+  "files": [
+    "index.ts",
+    "package.json",
+    "README.md"
+  ],
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
