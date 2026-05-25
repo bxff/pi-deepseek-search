@@ -15,3 +15,9 @@ Uses `deepseek-v4-flash` by default. Switch it:
 ```bash
 export DEEPSEEK_SEARCH_MODEL=deepseek-v4-pro
 ```
+
+## How it works
+
+Most pi search extensions make separate API calls to external services like Exa or Brave. This one doesn't. It just points DeepSeek's Anthropic-compatible endpoint at a different URL and adds `web_search_20260209` as a server side tool. The model handles the search inline, same turn, same call. No roundtrips to a third party.
+
+Originally inspired by [@wierdbytes/pi-web](https://pi.dev/packages/@wierdbytes/pi-web), which does the same thing with Anthropic's endpoint. This swaps Anthropic for DeepSeek and strips everything down to just what's needed.
