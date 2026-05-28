@@ -267,10 +267,10 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
           {
             model: SEARCH_MODEL,
             max_tokens: DEFAULT_MAX_TOKENS,
-            thinking: { type: "disabled" },
             messages: [{ role: "user", content: query }],
-            system: "You are an assistant for performing a web search tool use. Return only the search results as plain text. Never output function_calls, invoke, or tool_call XML tags.",
+            system: "You are an assistant for performing a web search tool use.",
             tools: [tool],
+            tool_choice: { type: "tool", name: "web_search" },
           },
           signal,
           onProgress,
