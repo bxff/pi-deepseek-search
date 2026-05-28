@@ -276,7 +276,11 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
           onProgress,
         );
 
-        const answer = result.answerParts.join("\n\n") || `No results for: ${query}`;
+        const answer = result.answerParts
+          .join("\n\n")
+          .replace(/<function_calls>[\s\S]*?<\/function_calls>/g, "")
+          .replace(/<invoke[^>]*>[\s\S]*?<\/invoke>/g, "")
+          .trim() || `No results for: ${query}`;
         const sourceText = answer + formatSources(result.sources) + CITATION_REMINDER;
         const footer = `\n\n*${result.tokens.toLocaleString()} tokens · ${result.model}*`;
         return { content: [{ type: "text", text: sourceText + footer }], details: { sources: result.sources } };
