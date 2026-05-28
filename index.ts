@@ -257,7 +257,7 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
         const tool: Record<string, unknown> = {
           type: "web_search_20260209",
           name: "web_search",
-          max_uses: 1,
+          max_uses: 8,
         };
         if (p.allowed_domains?.length) tool.allowed_domains = p.allowed_domains;
         if (p.blocked_domains?.length) tool.blocked_domains = p.blocked_domains;
@@ -280,7 +280,6 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
           .join("\n\n")
           .replace(/<function_calls>[\s\S]*?<\/function_calls>/g, "")
           .replace(/<invoke[^>]*>[\s\S]*?<\/invoke>/g, "")
-          .replace(/<parameter[^>]*>[\s\S]*?<\/parameter>/g, "")
           .trim() || `No results for: ${query}`;
         const sourceText = answer + formatSources(result.sources) + CITATION_REMINDER;
         const footer = `\n\n*${result.tokens.toLocaleString()} tokens · ${result.model}*`;
