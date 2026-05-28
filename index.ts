@@ -18,7 +18,7 @@ import { Type } from "typebox";
 
 const ANTHROPIC_BASE = "https://api.deepseek.com/anthropic";
 const SEARCH_MODEL = process.env.DEEPSEEK_SEARCH_MODEL || "deepseek-v4-flash";
-const DEFAULT_MAX_TOKENS = 2048;
+const DEFAULT_MAX_TOKENS = 1500;
 const REQUEST_TIMEOUT_MS = 60_000;
 
 // ---------------------------------------------------------------------------
@@ -267,6 +267,7 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
           {
             model: SEARCH_MODEL,
             max_tokens: DEFAULT_MAX_TOKENS,
+            thinking: { type: "disabled" },
             messages: [{ role: "user", content: query }],
             system: "You are an assistant for performing a web search tool use. Return only the search results as plain text. Never output function_calls, invoke, or tool_call XML tags.",
             tools: [tool],
