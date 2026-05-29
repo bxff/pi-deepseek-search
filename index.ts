@@ -220,8 +220,9 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
     renderResult(result, { expanded }, theme) {
       const text = result.content[0];
       const body = text?.type === "text" ? text.text : "";
-      // Strip REMINDER line from display (it's for the model, not the user)
-      const clean = body.replace(/\n*REMINDER:.*$/s, "");
+      const xtag = /<[^>]*(?:tool_calls|invoke|parameter)[^>]*>/g;
+      const clean = body.replace(xtag, "")
+        .replace(/\n*REMINDER:.*$/s, "");
       const lines = clean.split("\n");
       if (!expanded) {
         const preview = lines.slice(0, 6);
@@ -242,7 +243,7 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
         return { content: [{ type: "text", text: "Error: query is required." }], isError: true };
       }
 
-      onUpdate?.({ content: [{ type: "text", text: "Searching…" }] });
+      onUpdate?.({ content: [{ type: "text", text: "Searching [v14-fix]…" }] });
 
       let firstProgress = true;
       const onProgress = (msg: string) => {
@@ -257,7 +258,7 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
         const tool: Record<string, unknown> = {
           type: "web_search_20260209",
           name: "web_search",
-          max_uses: 1,
+          max_uses: 8,
         };
         if (p.allowed_domains?.length) tool.allowed_domains = p.allowed_domains;
         if (p.blocked_domains?.length) tool.blocked_domains = p.blocked_domains;
@@ -275,10 +276,11 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
           onProgress,
         );
 
+        const xtag = /<[^>]*(?:tool_calls|invoke|parameter)[^>]*>/g;
         const answer = result.answerParts
           .join("\n\n")
-          .replace(/<function_calls>[\s\S]*?<\/function_calls>/g, "")
-          .replace(/<invoke[^>]*>[\s\S]*?<\/invoke>/g, "")
+          .replace(xtag, "")
+          .replace(/\n{3,}/g, "\n\n")
           .trim() || `No results for: ${query}`;
         const sourceText = answer + formatSources(result.sources) + CITATION_REMINDER;
         const footer = `\n\n*${result.tokens.toLocaleString()} tokens · ${result.model}*`;
