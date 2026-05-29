@@ -257,7 +257,7 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
         const tool: Record<string, unknown> = {
           type: "web_search_20260209",
           name: "web_search",
-          max_uses: 8,
+          max_uses: 1,
         };
         if (p.allowed_domains?.length) tool.allowed_domains = p.allowed_domains;
         if (p.blocked_domains?.length) tool.blocked_domains = p.blocked_domains;
@@ -270,7 +270,6 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
             messages: [{ role: "user", content: query }],
             system: "You are an assistant for performing a web search tool use. Do not output tool call syntax.",
             tools: [tool],
-            tool_choice: { type: "tool", name: "web_search" },
           },
           signal,
           onProgress,
