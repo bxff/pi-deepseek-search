@@ -1,59 +1,81 @@
 # pi-deepseek-search
 
+Web search for **Pi** and **Prime Agent** using DeepSeek's server-side search
+(`web_search_20260209`). The search runs on DeepSeek's Anthropic-compatible endpoint, so
+this switches your search calls there automatically — no extra API keys or config if you
+already use DeepSeek.
+
 ![demo](demo.gif)
 
-```bash
-pi install npm:pi-deepseek-search
-```
+## Which package do I need?
 
-Adds web search to Pi using DeepSeek's `web_search_20260209` server side tool (previously undocumented). Only available on DeepSeek's Anthropic-compatible endpoint, so this switches your search calls there automatically. No extra API keys or config needed if you use DeepSeek in Pi.
+This repo publishes **two packages** — one per client, deliberately kept separate:
 
-> May 26, 2026: DeepSeek has now [officially documented](https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code) the Anthropic API web search tool support.
-
-## Limitations
-
-Only works with DeepSeek models. The search runs on DeepSeek's servers during inference, so you can't use it with Anthropic, OpenAI, or any other provider.
-
-Defaults to `deepseek-v4-flash`. Set `DEEPSEEK_SEARCH_MODEL` to change it.
-
-Read more: [Using DeepSeek's undocumented web search in Pi](https://musaab.io/posts/2026/deepseek-search)
-
-[npm](https://www.npmjs.com/package/pi-deepseek-search) · [GitHub](https://github.com/bxff/pi-deepseek-search) · [pi.dev](https://pi.dev/packages/pi-deepseek-search)
-
-
-## Prime Agent
-
-This repo ships **two packages**:
-
-| Package | For | What you get |
+| You use | Install | You get |
 |---|---|---|
-| `pi-deepseek-search` (this one) | Pi | the `web_search` **extension tool** only |
-| `prime-deepseek-search` (`./prime`) | Prime Agent | the `deepseek-search` **skill** (`await deepseek_search("query")` in the kernel) only |
-
-The two are kept separate so Pi users don't get a skill they can't run, and Prime Agent users
-don't get an extension tool when they asked for a kernel skill. **Install the package for your
-client** — installing the wrong one is a soft failure (see below), not a break.
-
-```bash
-# Pi
-pi install npm:pi-deepseek-search
-
-# Prime Agent
-prime-agent package install npm:prime-deepseek-search
-```
+| Pi | `pi install npm:pi-deepseek-search` | the `web_search` **tool** (extension) |
+| Prime Agent | `prime-agent package install npm:prime-deepseek-search` | the `deepseek-search` **skill** (`await deepseek_search(...)` in the kernel) |
 
 Both read the DeepSeek key already saved via `/login` (provider `deepseek`) — no extra config.
 
-### Installed the wrong one?
+## Pi: the `web_search` tool
 
-- Prime Agent + `pi-deepseek-search`: you get the `web_search` tool, not the kernel skill.
-  Fix: `prime-agent package remove npm:pi-deepseek-search` then install `npm:prime-deepseek-search`.
-- Pi + `prime-deepseek-search`: the SKILL.md loads but Pi has no Python-kernel skill runner, so
-  the search instructions can't execute. Fix: `pi remove npm:prime-deepseek-search` then
-  `pi install npm:pi-deepseek-search`.
+Adds a `web_search` tool Pi can call directly, backed by DeepSeek's server-side search
+(previously undocumented; DeepSeek has since
+[officially documented](https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code)
+Anthropic API web search tool support).
 
-### Why not one package with both?
+```bash
+pi install npm:pi-deepseek-search
+```
 
-Both clients read all four `pi.*` manifest fields (`extensions`, `skills`, `prompts`, `themes`),
-and neither supports conditional loading — so a single package would hand Pi the skill and
-Prime Agent the tool. Two packages is the only clean separation.
+**Limitations:** only works with DeepSeek models — the search runs on DeepSeek's servers during
+inference, so it can't be used with Anthropic, OpenAI, or any other provider. Defaults to
+`deepseek-v4-flash`; set `DEEPSEEK_SEARCH_MODEL` to change it.
+
+Read more: [Using DeepSeek's undocumented web search in Pi](https://musaab.io/posts/2026/deepseek-search)
+
+## Prime Agent: the `deepseek-search` skill
+
+Provides a kernel-callable skill — a function the agent invokes directly, with the same
+"call a function" experience as Prime Agent's bundled Serper search:
+
+```bash
+prime-agent package install npm:prime-deepseek-search
+```
+
+```python
+import deepseek_search
+print(await deepseek_search("latest OpenUSD security advisories"))
+```
+
+Optional kwargs: `model`, `allowed_domains`, `blocked_domains`, `max_output`, `timeout`
+(`num_results` is accepted for Serper-API compatibility and ignored).
+Env overrides: `DEEPSEEK_SEARCH_MODEL`, `PRIME_AGENT_WEBSEARCH_TIMEOUT`.
+
+The skill **coexists** with Prime Agent's bundled Serper `websearch` skill — it does not
+override it. See [prime-deepseek-search on npm](https://www.npmjs.com/package/prime-deepseek-search)
+for the full docs.
+
+## Installed the wrong one?
+
+- **Prime Agent + this package**: you get the `web_search` tool, not the kernel skill. Fix:
+  `prime-agent package remove npm:pi-deepseek-search` then
+  `prime-agent package install npm:prime-deepseek-search`.
+- **Pi + `prime-deepseek-search`**: Pi loads the SKILL.md as a markdown skill but has no
+  Python-kernel skill runner, so the instructions can't execute. Fix:
+  `pi remove npm:prime-deepseek-search` then `pi install npm:pi-deepseek-search`.
+
+## Why two packages?
+
+Both clients read all four `pi.*` manifest fields (`extensions`, `skills`, `prompts`,
+`themes`) and neither supports conditional loading — a single package would hand Pi a skill
+it can't run and Prime Agent a tool it didn't ask for. Two packages is the only clean
+separation.
+
+## Links
+
+[npm](https://www.npmjs.com/package/pi-deepseek-search) ·
+[GitHub](https://github.com/bxff/pi-deepseek-search) ·
+[pi.dev](https://pi.dev/packages/pi-deepseek-search) ·
+[prime-deepseek-search on npm](https://www.npmjs.com/package/prime-deepseek-search)
