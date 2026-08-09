@@ -1,6 +1,5 @@
 {
   "name": "pi-deepseek-search",
-  "version": "1.0.15",
   "description": "Web search for Pi using DeepSeek's server side search. Only works with DeepSeek models.",
   "keywords": [
     "pi-package",
@@ -24,5 +23,6 @@
     "extensions": [
       "./index.ts"
     ]
-  }
+  },
+  "version": "1.0.16"
 }
