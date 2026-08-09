@@ -19,3 +19,14 @@ Defaults to `deepseek-v4-flash`. Set `DEEPSEEK_SEARCH_MODEL` to change it.
 Read more: [Using DeepSeek's undocumented web search in Pi](https://musaab.io/posts/2026/deepseek-search)
 
 [npm](https://www.npmjs.com/package/pi-deepseek-search) · [GitHub](https://github.com/bxff/pi-deepseek-search) · [pi.dev](https://pi.dev/packages/pi-deepseek-search)
+
+
+## Prime Agent
+
+Prime Agent users: install the separate [`prime-deepseek-search`](https://www.npmjs.com/package/prime-deepseek-search) package:
+
+```bash
+prime-agent package install npm:prime-deepseek-search
+```
+
+It provides the `deepseek-search` skill (`await deepseek_search("...")`) instead of the `web_search` tool.
