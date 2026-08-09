@@ -28,7 +28,7 @@ const REQUEST_TIMEOUT_MS = 60_000;
 async function resolveApiKey(ctx: ExtensionContext): Promise<string> {
   const key = await ctx.modelRegistry.getApiKeyForProvider("deepseek");
   if (key) return key;
-  const cc = process.env.ANTHROPIC_AUTH_TOKEN;
+  const cc = process.env.DEEPSEEK_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN;
   if (cc) return cc;
   throw new Error(
     "No DeepSeek API key found. Run /login in pi and select DeepSeek, or set DEEPSEEK_API_KEY.",
@@ -188,8 +188,7 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
   pi.on("session_start", async (_event, ctx) => {
     // Only register if DeepSeek is configured
     try {
-      const key = await resolveApiKey(ctx);
-      if (!key) return;
+      await resolveApiKey(ctx);
     } catch {
       return;
     }
@@ -243,7 +242,7 @@ export default function deepseekSearchExtension(pi: ExtensionAPI) {
         return { content: [{ type: "text", text: "Error: query is required." }], isError: true };
       }
 
-      onUpdate?.({ content: [{ type: "text", text: "Searching [v14-fix]…" }] });
+      onUpdate?.({ content: [{ type: "text", text: "Searching…" }] });
 
       let firstProgress = true;
       const onProgress = (msg: string) => {

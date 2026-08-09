@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 
 import httpx
+import re
 
 # DeepSeek's Anthropic-compatible endpoint; the only server tool it supports.
 _ANTHROPIC_BASE = "https://api.deepseek.com/anthropic"
@@ -153,7 +154,6 @@ async def _deepseek_search(
                         else:
                             answer_parts.append(delta["text"])
 
-    import re  # noqa: PLC0415
 
     answer = (
         "\n\n".join(part.strip() for part in answer_parts if part.strip())

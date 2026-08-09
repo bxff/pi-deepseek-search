@@ -15,14 +15,12 @@
     "url": "git+https://github.com/bxff/pi-deepseek-search.git"
   },
   "files": [
-    "index.ts",
-    "package.json",
-    "README.md"
+    "index.ts"
   ],
   "pi": {
     "extensions": [
       "./index.ts"
     ]
   },
-  "version": "1.0.16"
+  "version": "1.0.17"
 }
