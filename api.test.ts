@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildSearchRequest, fetchPage, search, validateFetchUrl } from "./api.ts";
+import { serverSearch } from "./server.ts";
 
 function jsonResponse(body: unknown, status = 200, headers?: HeadersInit): Response {
   return new Response(JSON.stringify(body), {
@@ -13,12 +14,10 @@ test("search maps legacy domain filters to documented query operators", () => {
   assert.deepEqual(
     buildSearchRequest({
       query: "DeepSeek",
-      count: 5,
       allowed_domains: ["github.com", "example.org"],
     }),
     {
       query: "DeepSeek site:github.com OR site:example.org",
-      count: 5,
     },
   );
   assert.equal(
@@ -42,7 +41,6 @@ test("search maps legacy domain filters to documented query operators", () => {
       }),
     /cannot be combined/,
   );
-  assert.throws(() => buildSearchRequest({ query: "x", count: 51 }), /count/);
   assert.throws(() => buildSearchRequest({ query: " ".repeat(5) }), /query/);
   assert.equal(buildSearchRequest({ query: "🧪".repeat(128) }).query, "🧪".repeat(128));
   assert.throws(
@@ -53,7 +51,6 @@ test("search maps legacy domain filters to documented query operators", () => {
       }),
     /128/,
   );
-  assert.throws(() => buildSearchRequest({ query: "x", localization: "not-an-ip" }), /IP address/);
 });
 
 test("Search uses the standalone endpoint, bearer auth, documented body and per-request cost", async () => {
@@ -75,20 +72,17 @@ test("Search uses the standalone endpoint, bearer auth, documented body and per-
     "test-key",
     {
       query: "DeepSeek",
-      count: 50,
-      need_content: true,
-      ori_question: "What is DeepSeek?",
     },
     undefined,
     mockFetch,
   );
   assert.equal(calls[0].url, "https://api.deepseek.com/v1/tools/search");
-  assert.equal((calls[0].options.headers as Record<string, string>).Authorization, "Bearer test-key");
+  assert.equal(
+    (calls[0].options.headers as Record<string, string>).Authorization,
+    "Bearer test-key",
+  );
   assert.deepEqual(JSON.parse(calls[0].options.body as string), {
     query: "DeepSeek",
-    count: 50,
-    need_content: true,
-    ori_question: "What is DeepSeek?",
   });
   assert.equal(result.billable, true);
   assert.equal(result.estimatedCostUsd, 0.00075);
@@ -159,4 +153,128 @@ test("cancellation stops a retry before another request", async () => {
     name: "AbortError",
   });
   assert.equal(requests, 1);
+});
+
+test("server backend uses native search, deduplicates sources and reports model usage without a fee estimate", async () => {
+  const mockFetch = (async (url: string, options: RequestInit) => {
+    assert.equal(url, "https://api.deepseek.com/anthropic/v1/messages");
+    assert.equal((options.headers as Record<string, string>)["x-api-key"], "key");
+    const body = JSON.parse(options.body as string);
+    assert.equal(body.model, "deepseek-flash");
+    assert.deepEqual(body.thinking, { type: "disabled" });
+    assert.equal(
+      body.messages[0].content,
+      "Perform a web search using this exact query, preserving all search operators: DeepSeek site:deepseek.com",
+    );
+    assert.deepEqual(body.tools, [
+      {
+        type: "web_search_20260209",
+        name: "web_search",
+        max_uses: 5,
+      },
+    ]);
+    return jsonResponse({
+      model: "deepseek-flash",
+      content: [
+        {
+          type: "text",
+          text: "Answer with an invented URL: https://invented.example",
+          citations: [{ url: "https://deepseek.com", cited_text: "Grounded excerpt" }],
+        },
+        {
+          type: "web_search_tool_result",
+          content: [
+            {
+              type: "web_search_result",
+              title: "DeepSeek",
+              url: "https://deepseek.com",
+            },
+            {
+              type: "web_search_result",
+              title: "Duplicate",
+              url: "https://deepseek.com",
+            },
+          ],
+        },
+      ],
+      usage: { input_tokens: 100, output_tokens: 20 },
+    });
+  }) as typeof fetch;
+  const result = await serverSearch(
+    "key",
+    {
+      query: "DeepSeek",
+      allowed_domains: ["deepseek.com"],
+    },
+    "deepseek-flash",
+    undefined,
+    mockFetch,
+  );
+  assert.equal("answer" in result, false);
+  assert.equal(result.sources.length, 1);
+  assert.equal(result.sources[0].snippet, "Grounded excerpt");
+  assert.equal(result.inputTokens, 100);
+  assert.equal(result.outputTokens, 20);
+  assert.equal("estimatedCostUsd" in result, false);
+});
+
+test("server backend rejects missing searches and native tool errors, and preserves truncated results", async () => {
+  const cases = [
+    {
+      content: [{ type: "text", text: "An answer without searching" }],
+      expected: /did not perform/,
+    },
+    {
+      content: [
+        {
+          type: "web_search_tool_result",
+          content: { error_code: "max_uses_exceeded" },
+        },
+      ],
+      expected: /max_uses_exceeded/,
+    },
+  ];
+  for (const { expected, ...payload } of cases) {
+    await assert.rejects(
+      serverSearch("key", { query: "test" }, "deepseek-flash", undefined, (async () =>
+        jsonResponse(payload)) as typeof fetch),
+      expected,
+    );
+  }
+  const truncated = await serverSearch(
+    "key",
+    { query: "test" },
+    "deepseek-flash",
+    undefined,
+    (async () =>
+      jsonResponse({
+        content: [{ type: "web_search_tool_result", content: [] }],
+        stop_reason: "max_tokens",
+      })) as typeof fetch,
+  );
+  assert.deepEqual(truncated.sources, []);
+});
+
+test("server backend preserves HTTP failures and caller cancellation without retrying model turns", async () => {
+  let requests = 0;
+  await assert.rejects(
+    serverSearch("key", { query: "test" }, "deepseek-flash", undefined, (async () => {
+      requests++;
+      return jsonResponse({ error: { message: "out of balance" } }, 402);
+    }) as typeof fetch),
+    /402: out of balance/,
+  );
+  assert.equal(requests, 1);
+  const controller = new AbortController();
+  controller.abort();
+  await assert.rejects(
+    serverSearch("key", { query: "test" }, "deepseek-flash", controller.signal, (async (
+      _url: string,
+      options: RequestInit,
+    ) => {
+      options.signal?.throwIfAborted();
+      throw new Error("Expected an aborted signal");
+    }) as typeof fetch),
+    { name: "AbortError" },
+  );
 });

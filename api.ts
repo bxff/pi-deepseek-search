@@ -1,6 +1,5 @@
 /** Transport and validation for DeepSeek's standalone Search and Fetch APIs. */
 
-import { isIP } from "node:net";
 import { setTimeout as delay } from "node:timers/promises";
 
 const API_BASE = "https://api.deepseek.com/v1/tools";
@@ -10,10 +9,6 @@ export const PRICE_PER_SUCCESSFUL_REQUEST_USD = 0.00075;
 
 export interface SearchInput {
   query: string;
-  count?: number;
-  need_content?: boolean;
-  ori_question?: string;
-  localization?: string;
   allowed_domains?: string[];
   blocked_domains?: string[];
 }
@@ -61,7 +56,7 @@ function validateDomains(domains: string[] | undefined, label: string): string[]
   return domains;
 }
 
-export function buildSearchRequest(input: SearchInput): Record<string, string | number | boolean> {
+export function buildSearchRequest(input: SearchInput): { query: string } {
   validateText(input.query, "query");
   const allowed = validateDomains(input.allowed_domains, "allowed_domains");
   const blocked = validateDomains(input.blocked_domains, "blocked_domains");
@@ -72,30 +67,12 @@ export function buildSearchRequest(input: SearchInput): Record<string, string | 
   if (blocked.length) query += ` ${blocked.map((domain) => `-site:${domain}`).join(" ")}`;
   validateText(query, "query with domain filters");
 
-  const body: Record<string, string | number | boolean> = { query };
-  if (input.count !== undefined) {
-    if (!Number.isInteger(input.count) || input.count < 1 || input.count > 50)
-      throw new Error("count must be an integer from 1 to 50.");
-    body.count = input.count;
-  }
-  if (input.need_content !== undefined) {
-    if (typeof input.need_content !== "boolean") throw new Error("need_content must be a boolean.");
-    body.need_content = input.need_content;
-  }
-  if (input.ori_question !== undefined) {
-    validateText(input.ori_question, "ori_question");
-    body.ori_question = input.ori_question;
-  }
-  if (input.localization !== undefined) {
-    if (typeof input.localization !== "string" || (input.localization !== "" && !isIP(input.localization)))
-      throw new Error("localization must be an IP address.");
-    body.localization = input.localization;
-  }
-  return body;
+  return { query };
 }
 
 export function validateFetchUrl(url: string): void {
-  if (typeof url !== "string" || url.length > 8192) throw new Error("url must be at most 8192 characters.");
+  if (typeof url !== "string" || url.length > 8192)
+    throw new Error("url must be at most 8192 characters.");
   let parsed: URL;
   try {
     parsed = new URL(url);
@@ -189,7 +166,8 @@ export async function search(
     signal,
     fetchImpl,
   );
-  if (!Array.isArray(data?.results)) throw new Error("DeepSeek Search returned an invalid results payload.");
+  if (!Array.isArray(data?.results))
+    throw new Error("DeepSeek Search returned an invalid results payload.");
   const billable = data.results.length > 0;
   return {
     results: data.results,

@@ -1,6 +1,6 @@
 {
   "name": "pi-deepseek-search",
-  "description": "Web search and page fetch for Pi using DeepSeek's standalone APIs, with any active model.",
+  "description": "Web search and page fetch for Pi using DeepSeek, with any active model.",
   "keywords": [
     "pi-package",
     "pi-extension",
@@ -20,12 +20,13 @@
   },
   "files": [
     "index.ts",
-    "api.ts"
+    "api.ts",
+    "server.ts"
   ],
   "pi": {
     "extensions": [
       "./index.ts"
     ]
   },
-  "version": "1.1.1"
+  "version": "1.2.0"
 }
