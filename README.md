@@ -22,7 +22,7 @@ Server mode uses an additional DeepSeek model request for search, with `DEEPSEEK
 
 Standalone Search and Fetch cost [$0.75 per 1,000 successful requests](https://api-docs.deepseek.com/guides/search/#billing). Failed requests and empty results are free. The tool footer shows an estimated request cost.
 
-Server search adds model-token charges and can make up to five native searches per call. DeepSeek's [temporary waiver for server-side request fees](https://api-docs.deepseek.com/quick_start/pricing/#search--fetch-pricing) ends November 1, 2026 at 00:00 Beijing time; standard request pricing applies after that. The announcement names DeepSeek Harness, Claude Code, and Codex; Pi's eligibility is not explicitly documented. Even during the waiver, model-token costs can make server search more expensive than the standalone API.
+Server search adds model-token charges and can make up to five native searches per call. DeepSeek's [temporary waiver for server-side request fees](https://api-docs.deepseek.com/quick_start/pricing/#search--fetch-pricing) ends November 1, 2026 at 00:00 Beijing time; standard request pricing applies after that. Even during the waiver, model-token costs can make server search more expensive than the standalone API.
 
 ## Prime Agent
 
