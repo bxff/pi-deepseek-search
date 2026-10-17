@@ -3,10 +3,8 @@
 Search the web from Pi using DeepSeek's [Search & Fetch APIs](https://api-docs.deepseek.com/guides/search).
 
 ```bash
-pi install git:github.com/bxff/pi-deepseek-search
+pi install npm:pi-deepseek-search
 ```
-
-The npm package is still on v1.0.20 until v1.1.0 is published.
 
 `web_search` returns links and summaries. `web_fetch` reads a page as Markdown. Search accepts `count` (1–50), `need_content`, `ori_question`, and `localization`. The existing `allowed_domains` and `blocked_domains` options still work through DeepSeek's `site:` query operators.
 
