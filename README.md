@@ -1,5 +1,7 @@
 # pi-deepseek-search
 
+![demo](https://raw.githubusercontent.com/bxff/pi-deepseek-search/main/demo.gif)
+
 Search the web from Pi using DeepSeek's [Search & Fetch APIs](https://api-docs.deepseek.com/guides/search).
 
 ```bash
@@ -26,6 +28,6 @@ Server search adds model-token charges and can make up to five native searches p
 
 ## Prime Agent
 
-[`prime-deepseek-search`](https://www.npmjs.com/package/prime-deepseek-search) is a separate package and still uses the older model-mediated search tool.
+[`prime-deepseek-search`](https://www.npmjs.com/package/prime-deepseek-search) provides Search and Fetch as a kernel-callable Python skill for Prime Agent.
 
-[npm](https://www.npmjs.com/package/pi-deepseek-search) · [GitHub](https://github.com/bxff/pi-deepseek-search) · [pi.dev](https://pi.dev/packages/pi-deepseek-search)
+[npm](https://www.npmjs.com/package/pi-deepseek-search) · [GitHub](https://github.com/bxff/pi-deepseek-search) · [pi.dev](https://pi.dev/packages/pi-deepseek-search) · [Blog post](https://musaab.io/posts/2026/deepseek-search)

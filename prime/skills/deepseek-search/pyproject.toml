@@ -1,7 +1,7 @@
 [project]
 name = "prime-agent-skill-deepseek-search"
-version = "0.1.0"
-description = "Web search skill for Prime Agent (DeepSeek server-side search)."
+version = "0.2.0"
+description = "DeepSeek Search and Fetch skill for Prime Agent."
 requires-python = ">=3.10"
 dependencies = ["httpx"]
 

@@ -2,6 +2,14 @@ name: Publish
 
 on:
   workflow_dispatch:
+    inputs:
+      package:
+        type: choice
+        description: Package to publish
+        default: pi-deepseek-search
+        options:
+          - pi-deepseek-search
+          - prime-deepseek-search
 
 permissions:
   contents: read
@@ -11,6 +19,9 @@ jobs:
   publish:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.package == 'prime-deepseek-search' && 'prime' || '.' }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -18,5 +29,11 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
           package-manager-cache: false
+      - uses: actions/setup-python@v6
+        if: inputs.package == 'prime-deepseek-search'
+        with:
+          python-version: '3.11'
+      - run: python -m pip install ./skills/deepseek-search
+        if: inputs.package == 'prime-deepseek-search'
       - run: npm test
       - run: npm publish --access public

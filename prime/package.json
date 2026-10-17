@@ -1,7 +1,10 @@
 {
   "name": "prime-deepseek-search",
-  "version": "1.0.20",
-  "description": "Native web search for Prime Agent using DeepSeek's server side search. Kernel-callable skill (await deepseek_search), no extension tool. Install with: prime-agent package install npm:prime-deepseek-search",
+  "version": "1.2.0",
+  "description": "Web search and page fetch for Prime Agent using DeepSeek, as a kernel-callable Python skill.",
+  "scripts": {
+    "test": "python3 -m unittest discover -s tests -v"
+  },
   "keywords": [
     "pi-package",
     "pi-skill",
@@ -19,7 +22,9 @@
     "url": "git+https://github.com/bxff/pi-deepseek-search.git"
   },
   "files": [
-    "skills"
+    "skills/deepseek-search/SKILL.md",
+    "skills/deepseek-search/pyproject.toml",
+    "skills/deepseek-search/src/**/*.py"
   ],
   "pi": {
     "skills": [

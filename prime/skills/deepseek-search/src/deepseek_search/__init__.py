@@ -1,5 +1,5 @@
-"""DeepSeek server-side web search skill."""
+"""DeepSeek Search and Fetch skill."""
 
-from .deepseek_search import run
+from .deepseek_search import fetch, run
 
-__all__ = ["run"]
+__all__ = ["fetch", "run"]
