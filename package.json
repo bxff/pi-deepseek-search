@@ -1,6 +1,6 @@
 {
   "name": "pi-deepseek-search",
-  "description": "Web search for Pi using DeepSeek's server side search. Only works with DeepSeek models.",
+  "description": "Web search and page fetch for Pi using DeepSeek's standalone APIs, with any active model.",
   "keywords": [
     "pi-package",
     "pi-extension",
@@ -8,19 +8,24 @@
     "deepseek",
     "search"
   ],
+  "scripts": {
+    "test": "node --experimental-strip-types --test api.test.ts"
+  },
   "license": "MIT",
+  "type": "module",
   "author": "Dex Devlon (bxff)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bxff/pi-deepseek-search.git"
   },
   "files": [
-    "index.ts"
+    "index.ts",
+    "api.ts"
   ],
   "pi": {
     "extensions": [
       "./index.ts"
     ]
   },
-  "version": "1.0.20"
+  "version": "1.1.0"
 }
